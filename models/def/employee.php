@@ -27,5 +27,7 @@ define('E_CREATED', 'created');
 define('E_ADMIN_VRFD', 'verified_by_admin');
 define('E_DOC_PERM', 'upload_doc_perm');
 
+define('DOB_SEP', '.');
+
 
 

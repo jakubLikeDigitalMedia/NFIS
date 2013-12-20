@@ -44,7 +44,18 @@ define('SEO_TITLE', 'Nobel Food Intranet System');
 define('PAGES_DIR', 'intranet');
 
 //database connection info
-define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_PASS', 'root');
-define('DB_DBASE', 'nobel_nfis_db');
+//------------------------
+if ($_SERVER['SERVER_NAME'] == 'nfis.com'){
+    define('DB_HOST', 'localhost');
+    define('DB_USER', 'root');
+    define('DB_PASS', 'root');
+    define('DB_DBASE', 'nobel_nfis_db');
+}
+else{
+    define('DB_HOST', 'localhost');
+    define('DB_USER', 'nobel_NFIS');
+    define('DB_PASS', '1ntr4n3t');
+    define('DB_DBASE', 'nobel_NFIS_DB');
+
+}
+

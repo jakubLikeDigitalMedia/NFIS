@@ -61,19 +61,12 @@ class DbQueryManager {
             $values[] = $this->conn->real_escape_string($value);
         }
         $query = "INSERT INTO $table (".implode(',', $columns).") VALUES ('".implode("','", $values)."')";
+
         if (isset($options['check_parent']) && $options['check_parent'] === FALSE){
             $query = 'SET FOREIGN_KEY_CHECKS = 0; '.$query;
-            if ($this->conn->multi_query($query)){
-                do {
-                    $result = $this->conn->next_result();
-                } while ($this->conn->more_results());
-                if ($error = $this->conn->error){
-                    $this->rollBack();
-                    throw new DatabaseErrorException($error, $query);
-                }
-                else return $this->conn->insert_id; // last inserted id
-            }
+            if ($this->multiQuery($query))  return $this->conn->insert_id; // last inserted id
         }
+
         //die($query);
         if ($this->conn->query($query)){
             return $this->conn->insert_id; // last inserted id
@@ -83,6 +76,20 @@ class DbQueryManager {
             throw new DatabaseErrorException($this->conn->error, $query);
         }
 
+    }
+
+
+    private function multiQuery($multiQuery){
+        if ($this->conn->multi_query($multiQuery)){
+            do {
+                if (!$this->conn->next_result()) throw new DatabaseErrorException($this->conn->error, $multiQuery);
+            } while ($this->conn->more_results());
+            if ($error = $this->conn->error){
+                $this->rollBack();
+                throw new DatabaseErrorException($error, $multiQuery);
+            }
+            else return TRUE;
+        }
     }
 
 

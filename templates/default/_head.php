@@ -22,7 +22,7 @@ if (!isset($_SESSION['user']['userADId'])){
     {
         $_SESSION['user']['userADId'] = $userADId;
         //header('location: '.PAGES_DIR.'/create_account.php');
-        header('location: create_account.php');
+        header('location: '.PAGES_DIR.'create_account.php');
     }
     else{
         $_SESSION['user']['userADId'] = $employee->getProperty('activeDirId');

@@ -11,6 +11,7 @@ class InputValidator extends GUMP{
     private $predefRules = array(
         'name' => 'required|alpha_with_space|max_len,128',
         'email' => 'required|valid_email',
+        'DOB' => 'required|DOB',
         'intNoZeroReq' => 'required|int_no_zero',
         'street' => 'required|alpha_numeric_with_space|max_len,255',
         'postcode' => 'required|alpha_numeric_with_space|max_len,128',
@@ -20,6 +21,7 @@ class InputValidator extends GUMP{
     private $errorMessages = array(
         'validate_alpha' => 'Only letters are allowed',
         'validate_alpha_with_space' => 'Only letters are allowed',
+        'validate_DOB' => 'Invalid date format',
         'validate_street_address' => 'Only alphanumeric characters with spaces are allowed',
         'validate_alpha_numeric' => 'Only alphanumeric characters are allowed',
         'validate_alpha_numeric_with_space' => 'Only alphanumeric characters with spaces are allowed',
@@ -71,14 +73,7 @@ class InputValidator extends GUMP{
 
         $passes = preg_match('/[a-zA-Z\s\d]+/', $input[$field]);
 
-        if(!$passes) {
-            return array(
-                'field' => $field,
-                'value' => $input[$field],
-                'rule'	=> __FUNCTION__,
-                'param' => $param
-            );
-        }
+        if(!$passes) return $this->getResultArray($field, $input[$field], __FUNCTION__, $param);
 
     }
 
@@ -91,14 +86,30 @@ class InputValidator extends GUMP{
 
         $passes = ($input[$field] !== 0 );
 
-        if(!$passes) {
-            return array(
-                'field' => $field,
-                'value' => $input[$field],
-                'rule'	=> __FUNCTION__,
-                'param' => $param
-            );
+        if(!$passes) return $this->getResultArray($field, $input[$field], __FUNCTION__, $param);
+
+    }
+
+    public function validate_DOB($field, $input, $param = NULL){
+
+        if(!isset($input[$field])|| empty($input[$field]))
+        {
+            return;
         }
+
+        $passes = preg_match('/\d{1,2}\.\d{1,2}\s\d{4}/', $input[$field]);
+
+        if(!$passes) return $this->getResultArray($field, $input[$field], __FUNCTION__, $param);
+
+    }
+
+    private function getResultArray($field, $value, $func, $param){
+        return array(
+            'field' => $field,
+            'value' => $value,
+            'rule'	=> $func,
+            'param' => $param
+        );
 
     }
 
@@ -119,7 +130,7 @@ class InputValidator extends GUMP{
         $validationRules = array(
             E_TABLE.SEP.E_NAME => $this->predefRules['name'],
             E_TABLE.SEP.E_SURNAME => $this->predefRules['name'],
-            E_TABLE.SEP.E_DOB => 'required',
+            E_TABLE.SEP.E_DOB => $this->predefRules['DOB'],
             E_TABLE.SEP.E_EMAIL => $this->predefRules['email'],
             E_TABLE.SEP.E_PHONE_NUMBER => 'required',
             EMPL_TABLE.SEP.EMPL_POSITION => $this->predefRules['intNoZeroReq'],
@@ -136,16 +147,16 @@ class InputValidator extends GUMP{
         $this->sanitize($employeeDetails, $filterRules);
         $validationResult = $this->validate($employeeDetails, $validationRules);
         //return $validationResult;
-        if (is_array($validationResult)){
-            $errorMessages = array();
-            foreach ($validationResult as $resultField) {
-               $errorMessages[$resultField['field']] = (!empty($resultField['param']))? str_replace('?', $resultField['param'], $this->errorMessages[$resultField['rule']]): $errorMessages[$resultField['field']] = $this->errorMessages[$resultField['rule']];
-            }
-            return $errorMessages;
+        return (is_array($validationResult))? $this->getErrors($validationResult): NULL;
+    }
 
+    private function getErrors($validationResult){
+        $errorMessages = array();
+        foreach ($validationResult as $resultField) {
+            $errorMessages[$resultField['field']] = (!empty($resultField['param']))? str_replace('?', $resultField['param'], $this->errorMessages[$resultField['rule']]): $errorMessages[$resultField['field']] = $this->errorMessages[$resultField['rule']];
+            $errorMessages[$resultField['field']] = "<b>{$errorMessages[$resultField['field']]}</b>";
         }
-        else return NULL;
-
+        return $errorMessages;
     }
 
 

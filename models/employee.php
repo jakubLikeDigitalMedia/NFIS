@@ -8,18 +8,19 @@
 
 class Employee extends ModelAbstract{
 
-    protected  $activeDirId = NULL;
-    private $name = NULL;
-    private $surname = NULL;
-    private $email = NULL;
-    private $possitionId = NULL;
-    private $departmentId = NULL;
-    private $brandId = NULL;
+    protected $activeDirId = NULL;
+    protected $name = NULL;
+    protected $surname = NULL;
+    protected $email = NULL;
+    protected $positionId = NULL;
+    protected $departmentId = NULL;
+    protected $brandId = NULL;
+    protected $locationId = NULL;
 
     //intranet permission
-    private $createForum = NULL;
-    private $uploadDoc = NULL;
-    private $admin = NULL;
+    protected $createForum = NULL;
+    protected $uploadDoc = NULL;
+    protected $adminPerm = NULL;
 
     public function __construct(){
         parent::init(E_PRM_KEY, E_TABLE);
@@ -81,7 +82,7 @@ class Employee extends ModelAbstract{
      * @$employeeDetails - array of inserted values in format 'column' => 'value'
      */
     public function createAccount($employeeDetails){
-        $validationResult = self::validateInputData($employeeDetails);
+        $validationResult = $this->validateInputData($employeeDetails);
         if (empty($validationResult)){
             $employmentValues = $officeAddressValues = $employeeValues = array();
             foreach ($employeeDetails as $key => $value) {
@@ -105,8 +106,11 @@ class Employee extends ModelAbstract{
             $employment = new Employment();
             $officeAddress = new Address();
 
+            $employeeValues[E_DOB] = $this->getSQLDOB($employeeValues[E_DOB]);
+
             $this->dbQueryManager->startTransaction();
             if ($employeeValues[E_PARENT] == 0){
+                unset($employeeValues[E_PARENT]);
                 $employmentValues[EMPL_EMPLOYEE] = $this->createRecord($employeeValues, E_TABLE, array('check_parent' => FALSE));
             }
             $employmentValues[EMPL_OFFICE_ADDRESS] = $officeAddress->createRecord($officeAddressValues, OA_TABLE);
@@ -122,10 +126,17 @@ class Employee extends ModelAbstract{
 
     }
 
-    private static function validateInputData($employeeDetails){
+    private function validateInputData($employeeDetails){
         $validation = new InputValidator();
         return $validation->validateEmployee($employeeDetails);
     }
+
+    public function getSQLDOB($userDOB){
+        $dob = explode(DOB_SEP, $userDOB);
+        return date('Y-m-d', mktime(0,0,0,$dob[1],$dob[0],$dob[2]));
+    }
+
+
 
 
 
