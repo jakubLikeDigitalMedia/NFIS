@@ -82,13 +82,19 @@ class Employee extends ModelAbstract{
      * @$employeeDetails - array of inserted values in format 'column' => 'value'
      */
     public function createAccount($employeeDetails){
+        list($employeeDetails, $prevEmplVals) = $this->getPrevEmplVals($employeeDetails);
+        //die(var_dump($prevEmplVals));
         $validationResult = $this->validateInputData($employeeDetails);
-        if (empty($validationResult)){
+        if (empty($validationResult)){ // basic data validation ok
+            // test array values
+            foreach ($prevEmplVals as $values) {
+                $prevEmplValsValidationResult = $this->validateInputData($values);
+                if (!empty($prevEmplValsValidationResult)) return $prevEmplValsValidationResult;
+            }
+
             $employmentValues = $officeAddressValues = $employeeValues = array();
             foreach ($employeeDetails as $key => $value) {
-                $key = explode(SEP, $key);
-                $table = $key[0];
-                $column = $key[1];
+                list($table, $column) = explode(SEP, $key);
                 switch($table){
                     case E_TABLE:
                         $employeeValues[$column] = $value;
@@ -129,6 +135,25 @@ class Employee extends ModelAbstract{
     private function validateInputData($employeeDetails){
         $validation = new InputValidator();
         return $validation->validateEmployee($employeeDetails);
+    }
+
+    /*
+     * This function extracts array values from employee regist. form (previous employment)
+     * and place them to separate array. Array values will be removed from original $_POST
+     *
+     */
+
+    private function getPrevEmplVals($employeeDetails){
+        $prevEmplVals = array();
+        foreach ($employeeDetails as $key => $values) {
+            if (strstr($key, PREV_PREFIX)){
+                foreach ($values as $index => $value) {
+                    $prevEmplVals[$index][str_replace(PREV_PREFIX, '', $key)] = $value;
+                }
+                unset($employeeDetails[$key]);
+            }
+        }
+        return array($employeeDetails, $prevEmplVals);
     }
 
     public function getSQLDOB($userDOB){

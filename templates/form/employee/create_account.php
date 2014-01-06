@@ -16,7 +16,8 @@ $userInputs = (isset($_SESSION['user']['inputs']))? $_SESSION['user']['inputs']:
 
 ?>
 
-<form action="../scripts/create_account.php" method="post" name="create-account" id="create-account" accept-charset="utf-8">
+<form action="../scripts/create_account.php" method="post" name="create-account" id="create-account"
+      accept-charset="utf-8" xmlns="http://www.w3.org/1999/html">
   <div class="form-all">
     <fieldset>
         <label>Personal Information</label>
@@ -110,14 +111,14 @@ $userInputs = (isset($_SESSION['user']['inputs']))? $_SESSION['user']['inputs']:
             <label class="form-label-left" id="label_13" for="street"> House number & Street </label>
             <div class="error"><?=  get_field_error(OA_TABLE.SEP.OA_STREET, $inputErrors) ?></div>
             <div id="cid_13" class="form-input">
-              <input type="text" class=" form-textbox" data-type="input-textbox" id="street" name=<?= OA_TABLE.SEP.OA_STREET ?> size="40" value="<?= get_field_value(OA_TABLE.SEP.OA_STREET, $userInputs, 'Enter your house number and street') ?>" />
+              <input type="text" class=" form-textbox" data-type="input-textbox" id="street" name="<?= OA_TABLE.SEP.OA_STREET ?>" size="40" value="<?= get_field_value(OA_TABLE.SEP.OA_STREET, $userInputs, 'Enter your house number and street') ?>" />
             </div>
           </li>
           <li class="form-line" id="id_14">
             <label class="form-label-left" id="label_14" for="postcode"> Postcode </label>
             <div class="error"><?=  get_field_error(OA_TABLE.SEP.OA_POSTCODE, $inputErrors) ?></div>
             <div id="cid_14" class="form-input">
-              <input type="text" class=" form-textbox" data-type="input-textbox" id="postcode" name=<?= OA_TABLE.SEP.OA_POSTCODE ?> size="20" value="<?= get_field_value(OA_TABLE.SEP.OA_POSTCODE, $userInputs, 'Enter postcode')?>" maxlength="12" />
+              <input type="text" class=" form-textbox" data-type="input-textbox" id="postcode" name="<?= OA_TABLE.SEP.OA_POSTCODE ?>" size="20" value="<?= get_field_value(OA_TABLE.SEP.OA_POSTCODE, $userInputs, 'Enter postcode')?>" maxlength="12" />
             </div>
           </li>
           <li class="form-line" id="id_15">
@@ -131,16 +132,18 @@ $userInputs = (isset($_SESSION['user']['inputs']))? $_SESSION['user']['inputs']:
             <label class="form-label-left" id="label_16" for="county"> County </label>
             <div class="error"><?=  get_field_error(OA_TABLE.SEP.OA_COUNTY, $inputErrors) ?></div>
             <div id="cid_16" class="form-input">
-              <input type="text" class=" form-textbox" data-type="input-textbox" id="county" name=<?= OA_TABLE.SEP.OA_COUNTY ?> size="40" value="<?= get_field_value(OA_TABLE.SEP.OA_COUNTY, $userInputs, 'Enter county')?>" />
+              <input type="text" class=" form-textbox" data-type="input-textbox" id="county" name="<?= OA_TABLE.SEP.OA_COUNTY ?>" size="40" value="<?= get_field_value(OA_TABLE.SEP.OA_COUNTY, $userInputs, 'Enter county')?>" />
             </div>
           </li>
         </ul>
     </fieldset>
-      <div id="cid_2" class="form-input-wide">
-          <div style="margin-left:156px" class="form-buttons-wrapper">
-              <button id="input_2" type="submit" class="form-submit-button">Submit</button>
-          </div>
-      </div>
+  </div>
+    <button type="button" id="add-previous-options">Add</button>
+    <?php include_once(FORMS.'/employee/create_account_prev_empl.php') ?>
+    <div class="form-input-wide">
+     <div style="margin-left:156px" class="form-buttons-wrapper">
+         <button id="input_2" type="submit" class="form-submit-button">Submit</button>
+     </div>
   </div>
 </form>
 <?php

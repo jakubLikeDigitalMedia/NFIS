@@ -16,6 +16,7 @@ if (APPLICATION_ENV === 'development'){
     ini_set('display_errors', 1);
 }
 
+
 define('APPLICATION_PATH', realpath(dirname(__FILE__)));
 define('LIBS', APPLICATION_PATH.'/libs');
 define('SCRIPTS', APPLICATION_PATH.'/scripts');
@@ -25,7 +26,7 @@ define('MODELS_DEF', MODELS.'/def');
 define('DOMAIN', $_SERVER['SERVER_NAME']);
 
 define('IMAGES', APPLICATION_PATH.'/images');
-define('JS', APPLICATION_PATH.'/js');
+define('JS', '../js');
 define('CSS', '../css');
 
 // teplates settings
@@ -37,11 +38,25 @@ define('_HEADER', DEFAULT_TEMPLATES.'/_header.php');
 define('_FOOTER', DEFAULT_TEMPLATES.'/_footer.php');
 
 define('SEP', '-');
+define('PREV_PREFIX', 'prev:');
 
 define('SEO_TITLE', 'Nobel Food Intranet System');
 
 
 define('PAGES_DIR', 'intranet');
+
+$incs = array(
+    MODELS,
+    MODELS_DEF,
+    LIBS,
+    get_include_path()
+);
+
+set_include_path(implode(PATH_SEPARATOR, $incs));
+
+//die(get_include_path());
+
+
 
 //database connection info
 //------------------------

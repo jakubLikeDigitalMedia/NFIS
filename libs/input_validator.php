@@ -145,18 +145,38 @@ class InputValidator extends GUMP{
         );
 
         $this->sanitize($employeeDetails, $filterRules);
-        $validationResult = $this->validate($employeeDetails, $validationRules);
-        //return $validationResult;
-        return (is_array($validationResult))? $this->getErrors($validationResult): NULL;
+        return $this->getErrors($employeeDetails, $validationRules);
+
     }
 
-    private function getErrors($validationResult){
-        $errorMessages = array();
-        foreach ($validationResult as $resultField) {
-            $errorMessages[$resultField['field']] = (!empty($resultField['param']))? str_replace('?', $resultField['param'], $this->errorMessages[$resultField['rule']]): $errorMessages[$resultField['field']] = $this->errorMessages[$resultField['rule']];
-            $errorMessages[$resultField['field']] = "<b>{$errorMessages[$resultField['field']]}</b>";
+    public function validateEmployeePrevEmpl($employeeDetails){
+
+        $validationRules = array(
+            EMPL_TABLE.SEP.EMPL_POSITION => $this->predefRules['intNoZeroReq'],
+            EMPL_TABLE.SEP.EMPL_BRAND => $this->predefRules['intNoZeroReq'],
+            EMPL_TABLE.SEP.EMPL_LOCATION => $this->predefRules['intNoZeroReq'],
+            EMPL_TABLE.SEP.EMPL_DEPARTMENT => $this->predefRules['intNoZeroReq'],
+            OA_TABLE.SEP.OA_STREET => $this->predefRules['street'],
+            OA_TABLE.SEP.OA_POSTCODE => $this->predefRules['postcode'],
+            OA_TABLE.SEP.OA_CITY => 'required|'.$this->predefRules['alphaNumLen255'],
+            OA_TABLE.SEP.OA_COUNTY => $this->predefRules['alphaNumLen255'],
+        );
+
+        return $this->getErrors($employeeDetails, $validationRules);
+
+    }
+
+    private function getErrors($employeeDetails, $validationRules){
+        $validationResult = $this->validate($employeeDetails, $validationRules);
+        if (!is_array($validationResult)) return NULL;
+        else{
+            $errorMessages = array();
+            foreach ($validationResult as $resultField) {
+                $errorMessages[$resultField['field']] = (!empty($resultField['param']))? str_replace('?', $resultField['param'], $this->errorMessages[$resultField['rule']]): $errorMessages[$resultField['field']] = $this->errorMessages[$resultField['rule']];
+                $errorMessages[$resultField['field']] = "<b>{$errorMessages[$resultField['field']]}</b>";
+            }
+            return $errorMessages;
         }
-        return $errorMessages;
     }
 
 
