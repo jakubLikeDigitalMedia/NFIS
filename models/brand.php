@@ -9,7 +9,7 @@
 class Brand extends ModelAbstract{
 
     public function __construct(){
-        parent::init('brand_id', 'brand');
+        parent::init(B_PRM_KEY, B_TABLE);
     }
 
 } 

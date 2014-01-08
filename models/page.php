@@ -9,7 +9,7 @@
 class Page {
 
     public function __construct(){
-
+        parent::init(PAG_PRM_KEY, PAG_TABLE);
     }
 
     public function renderNavigation(){

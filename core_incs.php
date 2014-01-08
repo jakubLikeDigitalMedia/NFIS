@@ -29,7 +29,7 @@ include_once MODELS_DEF . '/employment.php';
 include_once MODELS . '/employment.php';
 
 
-
+include_once MODELS_DEF . '/brand.php';
 include_once MODELS . '/brand.php';
 
 include_once MODELS . '/location.php';

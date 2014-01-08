@@ -83,13 +83,18 @@ class Employee extends ModelAbstract{
      */
     public function createAccount($employeeDetails){
         list($employeeDetails, $prevEmplVals) = $this->getPrevEmplVals($employeeDetails);
-        //die(var_dump($prevEmplVals));
-        $validationResult = $this->validateInputData($employeeDetails);
+        $validationResult = $this->validateInputData($employeeDetails, 'current_empl');
         if (empty($validationResult)){ // basic data validation ok
             // test array values
-            foreach ($prevEmplVals as $values) {
-                $prevEmplValsValidationResult = $this->validateInputData($values);
-                if (!empty($prevEmplValsValidationResult)) return $prevEmplValsValidationResult;
+            foreach ($prevEmplVals as $index => $values) {
+                $prevEmplValsValidationResult = $this->validateInputData($values, 'prev_empl');
+                if (!empty($prevEmplValsValidationResult)){
+                    return array(
+                        'error_index' => $index,
+                        'errors' => $prevEmplValsValidationResult,
+                        'prev_empl_vals' => $prevEmplVals
+                    );
+                }
             }
 
             $employmentValues = $officeAddressValues = $employeeValues = array();
@@ -125,16 +130,21 @@ class Employee extends ModelAbstract{
             return true;
         }
         else{
-            return $validationResult;
+            return array(
+                'error_index' => NULL,
+                'errors' => $prevEmplValsValidationResult,
+                'prev_empl_vals' => $prevEmplVals
+            );
         }
 
 
 
     }
 
-    private function validateInputData($employeeDetails){
+    private function validateInputData($employeeDetails, $dataType){
         $validation = new InputValidator();
-        return $validation->validateEmployee($employeeDetails);
+        if ($dataType == 'current_empl') return $validation->validateEmployee($employeeDetails);
+        if ($dataType == 'prev_empl') return $validation->validateEmployeePrevEmpl($employeeDetails);
     }
 
     /*
