@@ -17,6 +17,7 @@ $htmlGen->navigationMenu();
 <h2>Please finish you registration before using services</h2>
 <?php
 $htmlGen->includeTemplate(FORMS.'/employee/create_account.php');
+$htmlGen->closePage();
 ?>
 
 

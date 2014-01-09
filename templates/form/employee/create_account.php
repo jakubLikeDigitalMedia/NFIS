@@ -11,8 +11,9 @@ $positionList = $position->getPropertyList('title');
 $locationList = $location->getPropertyList('title');
 $departmentList = $department->getPropertyList('title');
 
-$inputErrors = (isset($_SESSION['user']['input_errors']))? $_SESSION['user']['input_errors']: array();
-$userInputs = (isset($_SESSION['user']['inputs']))? $_SESSION['user']['inputs']: array();
+$inputErrors = (isset($_SESSION['user']['errors']['current_empl']))? $_SESSION['user']['errors']['current_empl']: array();
+$userInputs = (isset($_SESSION['user']['inputs']['current_empl']))? $_SESSION['user']['inputs']['current_empl']: array();
+
 
 ?>
 
@@ -138,8 +139,22 @@ $userInputs = (isset($_SESSION['user']['inputs']))? $_SESSION['user']['inputs']:
         </ul>
     </fieldset>
   </div>
+    Previous Employment
     <button type="button" id="add-previous-options">Add</button>
-    <?php include_once(FORMS.'/employee/create_account_prev_empl.php') ?>
+    <div id="previous-employment">
+        <div class="add-block" >
+            <?php
+                if(isset($_SESSION['user']['inputs']['prev_empl'])){
+                    $hide = FALSE;
+                    for($i=0; $i < count($_SESSION['user']['inputs']['prev_empl']); $i++){
+                        $inputErrors = (isset($_SESSION['user']['errors']['prev_empl'][$i]))? $_SESSION['user']['errors']['prev_empl'][$i]: array();
+                        $userInputs = (isset($_SESSION['user']['inputs']['prev_empl'][$i]))? $_SESSION['user']['inputs']['prev_empl'][$i]: array();
+                        include(FORMS.'/employee/create_account_prev_empl.php');
+                    }
+                }
+            ?>
+        </div>
+    </div>
     <div class="form-input-wide">
      <div style="margin-left:156px" class="form-buttons-wrapper">
          <button id="input_2" type="submit" class="form-submit-button">Submit</button>
@@ -147,8 +162,12 @@ $userInputs = (isset($_SESSION['user']['inputs']))? $_SESSION['user']['inputs']:
   </div>
 </form>
 <?php
+if (!isset($hide)){
+    $hide = TRUE;
+    include_once(FORMS.'/employee/create_account_prev_empl.php');
+}
 //clear session
-unset($_SESSION['user']['input_errors']);
+unset($_SESSION['user']['errors']);
 unset($_SESSION['user']['inputs']);
 
 ?>

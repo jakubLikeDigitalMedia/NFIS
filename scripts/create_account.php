@@ -9,19 +9,19 @@
 include_once '../core_incs.php';
 
 session_start();
-
-
- var_dump($_POST);
+//var_dump($_POST);
 $employee = new Employee();
 $result = $employee->createAccount($_POST);
 //die(var_dump($result));
-if (!empty($result['errors']) && is_array($result['errors'])){
-    $_SESSION['user']['input_errors'] = $result;
-    $_SESSION['user']['inputs'] = $_POST;
-    $_SESSION['user']['inputs']['prev_empl_vals'] = (isset($result['prev_empl_vals']))? $result['prev_empl_vals']: NULL;
+if (!empty($result['current_empl']) OR (!empty($result['prev_empl']))){
+    $_SESSION['user']['errors']['current_empl'] = $result['current_empl'];
+    $_SESSION['user']['inputs']['current_empl'] = $_POST;
+    $_SESSION['user']['errors']['prev_empl'] = $result['prev_empl'];
+    $_SESSION['user']['inputs']['prev_empl'] = $result['prev_empl_vals'];
+    //die(var_dump($_SESSION['user']));
     header('location: ../intranet/create_account.php');
 }
 elseif(is_bool($result) && $result === TRUE){
-    echo 'Inserted';
+    header('location: ../intranet/acount_created.php');
 
 }

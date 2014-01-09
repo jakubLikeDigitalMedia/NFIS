@@ -2,9 +2,8 @@ $(document).ready(function(){
 
     // adding new blocks for previous employment
     $('#add-previous-options').click(function(){
-        var newBlock = $('div.new-block');
-        var newBlockContainer = $('div.add-block');
-        (newBlock.is(':visible'))? newBlockContainer.append(newBlock.clone().show()): newBlock.show();
+       $('div.add-block').append($('div.original').clone().removeClass('original').show());
+
     })
 
     $('button.remove-block').on('click', function(){

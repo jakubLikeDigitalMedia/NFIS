@@ -61,13 +61,13 @@ class DbQueryManager {
             $values[] = $this->conn->real_escape_string($value);
         }
         $query = "INSERT INTO $table (".implode(',', $columns).") VALUES ('".implode("','", $values)."')";
-
+        //echo($query).'</br>';
         if (isset($options['check_parent']) && $options['check_parent'] === FALSE){
             $query = 'SET FOREIGN_KEY_CHECKS = 0; '.$query;
             if ($this->multiQuery($query))  return $this->conn->insert_id; // last inserted id
         }
 
-        //die($query);
+
         if ($this->conn->query($query)){
             return $this->conn->insert_id; // last inserted id
         }

@@ -97,7 +97,7 @@ class InputValidator extends GUMP{
             return;
         }
 
-        $passes = preg_match('/\d{1,2}\.\d{1,2}\s\d{4}/', $input[$field]);
+        $passes = preg_match('/\d{1,2}\.\d{1,2}\.\d{4}/', $input[$field]);
 
         if(!$passes) return $this->getResultArray($field, $input[$field], __FUNCTION__, $param);
 
@@ -152,14 +152,14 @@ class InputValidator extends GUMP{
     public function validateEmployeePrevEmpl($employeeDetails){
 
         $validationRules = array(
-            EMPL_TABLE.SEP.EMPL_POSITION => $this->predefRules['intNoZeroReq'],
-            EMPL_TABLE.SEP.EMPL_BRAND => $this->predefRules['intNoZeroReq'],
-            EMPL_TABLE.SEP.EMPL_LOCATION => $this->predefRules['intNoZeroReq'],
-            EMPL_TABLE.SEP.EMPL_DEPARTMENT => $this->predefRules['intNoZeroReq'],
-            OA_TABLE.SEP.OA_STREET => $this->predefRules['street'],
-            OA_TABLE.SEP.OA_POSTCODE => $this->predefRules['postcode'],
-            OA_TABLE.SEP.OA_CITY => 'required|'.$this->predefRules['alphaNumLen255'],
-            OA_TABLE.SEP.OA_COUNTY => $this->predefRules['alphaNumLen255'],
+            PREV_PREFIX.EMPL_TABLE.SEP.EMPL_POSITION => $this->predefRules['intNoZeroReq'],
+            PREV_PREFIX.EMPL_TABLE.SEP.EMPL_BRAND => $this->predefRules['intNoZeroReq'],
+            PREV_PREFIX.EMPL_TABLE.SEP.EMPL_LOCATION => $this->predefRules['intNoZeroReq'],
+            PREV_PREFIX.EMPL_TABLE.SEP.EMPL_DEPARTMENT => $this->predefRules['intNoZeroReq'],
+            PREV_PREFIX.OA_TABLE.SEP.OA_STREET => $this->predefRules['street'],
+            PREV_PREFIX.OA_TABLE.SEP.OA_POSTCODE => $this->predefRules['postcode'],
+            PREV_PREFIX.OA_TABLE.SEP.OA_CITY => 'required|'.$this->predefRules['alphaNumLen255'],
+            PREV_PREFIX.OA_TABLE.SEP.OA_COUNTY => $this->predefRules['alphaNumLen255'],
         );
 
         return $this->getErrors($employeeDetails, $validationRules);

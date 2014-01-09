@@ -48,7 +48,7 @@ define('PAGES_DIR', 'intranet');
 $incs = array(
     MODELS,
     MODELS_DEF,
-    LIBS,
+    LIBS.'/PFBC',
     get_include_path()
 );
 

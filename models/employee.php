@@ -83,58 +83,50 @@ class Employee extends ModelAbstract{
      */
     public function createAccount($employeeDetails){
         list($employeeDetails, $prevEmplVals) = $this->getPrevEmplVals($employeeDetails);
-        $validationResult = $this->validateInputData($employeeDetails, 'current_empl');
-        if (empty($validationResult)){ // basic data validation ok
-            // test array values
+        //die(var_dump($prevEmplVals));
+        // check current employment values
+        $validationResult['current_empl'] = $this->validateInputData($employeeDetails, 'current_empl');
+        $validationResult['prev_empl'] = NULL;
+
+        //check previous employment values
+        if (!empty($prevEmplVals)){
             foreach ($prevEmplVals as $index => $values) {
                 $prevEmplValsValidationResult = $this->validateInputData($values, 'prev_empl');
                 if (!empty($prevEmplValsValidationResult)){
-                    return array(
-                        'error_index' => $index,
-                        'errors' => $prevEmplValsValidationResult,
-                        'prev_empl_vals' => $prevEmplVals
-                    );
+                    $validationResult['prev_empl'][$index] = $prevEmplValsValidationResult;
                 }
             }
+        }
 
-            $employmentValues = $officeAddressValues = $employeeValues = array();
-            foreach ($employeeDetails as $key => $value) {
-                list($table, $column) = explode(SEP, $key);
-                switch($table){
-                    case E_TABLE:
-                        $employeeValues[$column] = $value;
-                        $employeeValues[E_ADID] = $_SESSION['user']['userADId'];
-                        break;
-                    case OA_TABLE: $officeAddressValues[$column] = $value;
-                        break;
-                    case EMPL_TABLE:
-                        $employmentValues[$column] = $value;
-                        $employmentValues[EMPL_CURRENT] = 1;
-                        break;
-                }
-            }
-
+        if (empty($validationResult['current_empl']) AND empty($validationResult['prev_empl'])){
             $employment = new Employment();
             $officeAddress = new Address();
 
-            $employeeValues[E_DOB] = $this->getSQLDOB($employeeValues[E_DOB]);
+            list($employeeValues, $officeAddressValues, $employmentValues) = $this->getInsertArrays($employeeDetails);
 
             $this->dbQueryManager->startTransaction();
-            if ($employeeValues[E_PARENT] == 0){
-                unset($employeeValues[E_PARENT]);
-                $employmentValues[EMPL_EMPLOYEE] = $this->createRecord($employeeValues, E_TABLE, array('check_parent' => FALSE));
+
+            $employmentValues[EMPL_EMPLOYEE] = $newEmployeeId = $this->createRecord($employeeValues, E_TABLE, array('check_parent' => FALSE));
+            $employmentValues[EMPL_OFFICE_ADDRESS] = $officeAddress->createRecord($officeAddressValues, $officeAddress->DbTable);
+            $employmentValues[EMPL_CURRENT] = 1;
+            $employment->createRecord($employmentValues, $employment->DbTable);
+
+            // insert previous employment records
+            if (!empty($prevEmplVals)){
+                foreach ($prevEmplVals as $values) {
+                    list($employeeValues, $officeAddressValues, $employmentValues) = $this->getInsertArrays($values);
+                    $employmentValues[EMPL_OFFICE_ADDRESS] = $officeAddress->createRecord($officeAddressValues, OA_TABLE);
+                    $employmentValues[EMPL_EMPLOYEE] = $newEmployeeId;
+                    $employment->createRecord($employmentValues, $employment->DbTable);
+                }
             }
-            $employmentValues[EMPL_OFFICE_ADDRESS] = $officeAddress->createRecord($officeAddressValues, OA_TABLE);
-            $employment->createRecord($employmentValues, EMPL_TABLE);
+
             $this->dbQueryManager->commit();
             return true;
         }
         else{
-            return array(
-                'error_index' => NULL,
-                'errors' => $prevEmplValsValidationResult,
-                'prev_empl_vals' => $prevEmplVals
-            );
+            $validationResult['prev_empl_vals'] = $prevEmplVals;
+            return $validationResult;
         }
 
 
@@ -158,7 +150,7 @@ class Employee extends ModelAbstract{
         foreach ($employeeDetails as $key => $values) {
             if (strstr($key, PREV_PREFIX)){
                 foreach ($values as $index => $value) {
-                    $prevEmplVals[$index][str_replace(PREV_PREFIX, '', $key)] = $value;
+                    $prevEmplVals[$index][$key] = $value;
                 }
                 unset($employeeDetails[$key]);
             }
@@ -166,7 +158,29 @@ class Employee extends ModelAbstract{
         return array($employeeDetails, $prevEmplVals);
     }
 
-    public function getSQLDOB($userDOB){
+    private function getInsertArrays($employeeDetails){
+        $employmentValues = $officeAddressValues = $employeeValues = array();
+        foreach ($employeeDetails as $key => $value) {
+            list($table, $column) = explode(SEP, $key);
+            $table = str_replace(PREV_PREFIX, '', $table);
+            switch($table){
+                case E_TABLE:
+                    $employeeValues[$column] = $value;
+                    if ($column == E_PARENT AND $value == 0) continue;
+                    if ($column == E_DOB) $employeeValues[$column] = $this->getSQLDOB($value);
+                    $employeeValues[E_ADID] = $_SESSION['user']['userADId'];
+                    break;
+                case OA_TABLE: $officeAddressValues[$column] = $value;
+                    break;
+                case EMPL_TABLE:
+                    $employmentValues[$column] = $value;
+                    break;
+            }
+        }
+        return array($employeeValues, $officeAddressValues, $employmentValues);
+    }
+
+    private function getSQLDOB($userDOB){
         $dob = explode(DOB_SEP, $userDOB);
         return date('Y-m-d', mktime(0,0,0,$dob[1],$dob[0],$dob[2]));
     }
