@@ -15,7 +15,8 @@ include_once LIBS.'/htmlgen.php';
 include_once LIBS.'/gump.class.php';
 include_once LIBS.'/input_validator.php';
 include_once LIBS.'/helpers.php';
-include_once LIBS.'/PFBC/Form.php';
+include_once LIBS.'/form_generator.php';
+include_once LIBS.'/form_helper.php';
 
 // models include
 include_once MODELS . '/model_abstract.php';
