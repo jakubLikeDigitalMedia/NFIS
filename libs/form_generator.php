@@ -19,9 +19,18 @@ class FormGenerator{
     // default element classes
     private $labelClass = 'label';
     private $TextFieldClass = 'text-field';
+    private $ButtonClass = 'button';
+
+    private $ButtonValue = 'Submit';
+    private $ButtonName = 'submit';
+    private $ButtonOptions = array();
 
     //default form attributes
     private $textFieldSize = 40;
+
+    private $blocks = array();
+
+
 
 
     public function __construct($name, $action, $method, $class = ''){
@@ -29,6 +38,11 @@ class FormGenerator{
         $this->action = $action;
         $this->method = $method;
         $this->class = $class;
+    }
+
+    public function setTextFieldSize($size){
+        $this->textFieldSize = $size;
+
     }
 
 
@@ -42,6 +56,24 @@ class FormGenerator{
                                         )
                                     );
 
+    }
+
+    public function createElements($elements, $groupName = NULL){
+        $newElements = array();
+        foreach($elements as $element){
+            $newElements[] = $this->createElement($element['type'], $element['label'], $element['name'], $element['value'], $element['options']);
+        }
+        return (!empty($groupName))? array($groupName => $newElements): $newElements;
+    }
+
+    public function addHTMLBlock($block){
+        $this->blocks[] = $block;
+    }
+
+    public function setSubmitButton($name, $value, $options){
+        $this->ButtonName = $name;
+        $this->ButtonValue = $value;
+        $this->ButtonOptions = $options;
     }
 
     private function renderElement($element){
@@ -59,7 +91,7 @@ class FormGenerator{
                 return $HTML;
                 break;
             case 'select':
-                $HTML .= "<select id=\"$id\" class=\"$class\" name=\"{$element['name']}\">{$element['value']}</select>";
+                $HTML .= "<select id=\"$id\" class=\"$class\" name=\"{$element['name']}\">";
                 $options = $element['value']['values'];
                 if (is_array($options)){
                     $initVal = (empty($options))? 'No options are available': 'Select value';
@@ -72,49 +104,75 @@ class FormGenerator{
                 }
                 else return $HTML.'</select>';
                 break;
+
         }
     }
+
+
+    private function getOption($element, $option){
+        switch($option){
+            case 'class':
+                return (isset($element['options']['class']))? $this->TextFieldClass.' '.$element['options']['class']: $this->TextFieldClass;
+                break;
+            default:
+                return (isset($element['options'][$option]))? $element['options'][$option]:'';
+        }
+    }
+    
     /*
+     * Adding elements to form
+     * -----------------------
      * function create sub array containing grouped elements and add this to elements array
      * @elements array of created elements
      * @groupName name of group
      */
-    public function addElementsToGroup($groupName, $elements){
-        $this->groups[$groupName] = $elements;
-        $this->elements[$groupName] = $this->groups[$groupName];
-
-
+    public function addElementsToGroup($groupName, $elements, $parentGroup = NULL){
+        if (!empty($parentGroup)){
+            $this->addElementsToParentGroup($this->elements, $parentGroup, $groupName, $elements);
+            return TRUE;
+        }
+        else{
+            (is_array($elements))? $this->elements[$groupName] = $elements: $this->elements[$groupName][] = $elements;
+            return TRUE;
+        }
     }
 
-    public function addElementsToSubgroup($parentGroup, $groupName, $elements){
-        if (isset($this->groups[$parentGroup])){
-            $this->groups[$parentGroup][$groupName] = $elements;
+    private function addElementsToParentGroup(&$groups, $parentGroupName, $childGroupName, $elements){
+        foreach ($groups as $groupName => $groupElements) {
+            //$this->addElement($groups[$groupName]);
+            if ($parentGroupName === $groupName){
+                (is_array($elements))? $groups[$parentGroupName][$childGroupName] = $elements: $groups[$parentGroupName][$childGroupName][] = $elements;
+            }
+            elseif (is_array($groupElements)) $this->addElementsToParentGroup($groupElements, $parentGroupName, $childGroupName, $elements);
+
         }
-        else return;
+        return TRUE;
     }
 
     public function addElements($elements){
-        foreach ($elements as $group => $elements) {
-            $elementsInGroup = array();
-            if (is_string($group)){
-
-                if (is_string($element)){
-                        foreach($elements[$group][$element] as $element){
-                            $groupElements[$group][$element][] = $this->createElement($element['type'], $element['label'], $element['name'], $element['value'], $element['options']);
-                        }
-                }
-                else{
-                    $elementsInGroup[] = $this->createElementsInGroup($group, $elements);
-                }
-            }
-            else{
+        foreach ($elements as $group => $groupElements) {
+            if (is_string($group))$this->createElementsInGroup($group, $groupElements);
+            else {
+                $element = $groupElements; // there is no group, so assume that $groupElements is single element
                 $this->addElement($this->createElement($element['type'], $element['label'], $element['name'], $element['value'], $element['options']));
             }
         }
+    }
 
-        foreach ($groupElements as $group => $elements) {
-            $this->createGroupElements($group, $elements);
+
+    /*
+      * function creates array of created element with @group param as key of array
+      * function is able to create sub arrays if list of @elements param contains name of group
+      * params:
+      * @group: name of group (fieldset)
+      * @elements: array of elements
+      */
+    private function createElementsInGroup($group, $elements, $parentGroup = NULL){
+        foreach ($elements as $key => $element) {
+            if (is_string($key) AND is_array($element)) $this->createElementsInGroup($key, $element, $group);
+            else $this->addElementsToGroup($group, $this->createElement($element['type'], $element['label'], $element['name'], $element['value'], $element['options']), $parentGroup);
         }
+        return TRUE;
 
     }
 
@@ -122,77 +180,77 @@ class FormGenerator{
         $this->elements[] = $element;
     }
 
+
+
+    //======================================================================================================================================
+
     public function render($type = NULL){
         $class = (!empty($this->class))? "class=\"{$this->class}\"": '';
         $form = "<form id=\"{$this->name}\" $class action=\"$this->action\" method=\"{$this->method}\">";
         $form .= $this->renderElements($this->elements, $type);
+        if (!empty($this->blocks)){
+            foreach($this->blocks as $block){
+                $form .= $block;
+            }
+        }
+        $form .= $this->createSubmitButton();
         $form .= '</form>';
         return $form;
 
     }
 
-    private function setTextFieldSize($size){
-        $this->textFieldSize = $size;
+    private function createSubmitButton(){
+        $class = (isset($options['class']))? "class=\"{$this->ButtonClass} {$options['class']}\"": $this->ButtonClass;
+        $options = $this->ButtonOptions;
+        $HTML = "<button id=\"{$this->ButtonName}\" type=\"submit\" $class >{$this->ButtonValue}</button>";
+        return (isset($options['wrapper']))? "<{$options['wrapper']}>$$HTML</{$options['wrapper']}>": $HTML;
 
     }
 
-    private function createElementsInGroup($group, $elements){
-        $elementsInGroup = array();
-        foreach ($elements as $element) {
-            $elementsInGroup[$group] = $this->createElement($element['type'], $element['label'], $element['name'], $element['value'], $element['options']);
-        }
+    
 
-    }
-
-    private function getOption($element, $option){
-        switch($option){
-            case 'class':
-                return (isset($element['options']['class']))? $this->TextFieldClass.' '.$element['options']['class']: $this->defTextFieldClass;
+    private function renderGroup($label, $elements, $type){
+        $HTML = (empty($label) OR is_numeric($label))? '': "<fieldset><legend>$label</legend>";
+        switch($type){
+            case 'list':
+                $HTML .= '<ul>';
+                foreach ($elements as $key => $value) {
+                    if (is_string($key)) $this->renderGroup($key, $value, $type);
+                    $HTML .= (is_array($value))? "<li>{$this->renderGroup($key, $value, $type)}</li>": "<li>$value</li>";
+                }
+                $HTML .= '</ul>';
+                //return $HTML;
+                break;
+            case 'div':
+                foreach ($elements as $key => $value) {
+                    if (is_string($key)) $this->renderGroup($key, $value, $type);
+                    $HTML .= (is_array($value))? "<div>{$this->renderGroup($key, $value, $type)}</div>": "<div>$value</div>";
+                }
+                //return $HTML;
                 break;
             default:
-                return (isset($element['options'][$option]))? $element['options'][$option]:'';
+                foreach ($elements as $key => $value) {
+                    if (is_string($key)) $this->renderGroup($key, $value, $type);
+                    $HTML .= (is_array($value))? "{$this->renderGroup($key, $value, $type)}": "$value";
+                }
+                //return $HTML;
         }
-    }
 
-
-
-    private function renderFieldset($label, $elements, $type){
-        $HTML = '<fieldset>';
-        $HTML .= "<legend>$label</legend>";
-        $HTML .= $this->renderElements($elements, $type);
-        $HTML .= '</fieldset>';
+        //$HTML .= $this->renderElements($elements, $type);
+        $HTML .= (empty($label) OR is_numeric($label))? '': '</fieldset>';
         return $HTML;
 
     }
+    
+    
 
-    private function renderElements($elements, $type){
-
-
-        switch($type){
-            case 'list':
-                $HTML = '<ul>';
-                foreach ($elements as $key => $value) {
-                    $HTML .= (is_array($value))? "<li>{$this->renderFieldset($key, $value, $type)}</li>": "<li>$value</li>";
-                }
-                $HTML .= '</ul>';
-                return $HTML;
-                break;
-            case 'div':
-                $HTML = '';
-                foreach ($elements as $key => $value) {
-                    $HTML .= (is_array($value))? "<div>{$this->renderFieldset($key, $value, $type)}</div>": "<div>$value</div>";
-                }
-                return $HTML;
-                break;
-            default:
-                $HTML = '';
-                foreach ($elements as $key => $value) {
-                    $HTML .= (is_array($value))? "{$this->renderFieldset($key, $value, $type)}": "$value";
-                }
-                return $HTML;
-
-
+    public function renderElements($elements, $type){
+        $HTML = '';
+        foreach ($elements as $group => $elements) {
+            $elements = (is_string($elements))? array($elements): $elements;
+            $HTML .= $this->renderGroup($group, $elements, $type);
         }
+        return $HTML;
     }
 
 

@@ -14,11 +14,26 @@ abstract class ModelAbstract {
 
     protected $dbQueryManager;
 
+    protected $createScript;
+    protected $updateScript;
+    Protected $deleteScript;
+
     protected function init($primaryKey, $dbTable){
         $this->primaryKey = $primaryKey;
         $this->DbTable = $dbTable;
         $this->dbQueryManager = new DbQueryManager();
 
+        // action script initialization
+        $this->actionScriptsInit();
+
+
+    }
+
+    protected function actionScriptsInit(){
+        $modelName = strtolower(preg_replace('/(\w)([A-Z])/', '$1_$2', get_class($this)));
+        $this->createScript = SCRIPTS."/$modelName/$modelName".'_'.CREATE_SUF.'.php';
+        $this->updateScript = SCRIPTS."/$modelName/$modelName".'_'.UPDATE_SUF.'.php';
+        $this->deleteScript = SCRIPTS."/$modelName/$modelName".'_'.DELETE_SUF.'.php';
     }
 
     public function getPropertyList($propertyName, $orderBy = NULL, $orderType = NULL){
