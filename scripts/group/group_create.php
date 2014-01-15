@@ -7,18 +7,19 @@
  */
 
 require('../../core_incs.php');
-$_post_group = $_POST['new_group'];
+
+session_start();
+
 //creating a new group
-$group_name = $_post_group;
-$group_table = "`group`";
-$group_model = new Group();
-$group_id = $group_model->createRecord(array("title" => "$group_name"), $group_table);
+$group = new Group();
+$result = $group->createGroup($_POST);
 
-//adding permissions for the group
-$permissions_table = "`".PE_TABLE."`";
-$permissions_model = new Permissions();
-$group_array = $permissions_model->createGroupArray($group_id, $_POST);// creating a multiple insert
-
-$permissions_model->createRecord($group_array, $permissions_table, array('multiple_insert' => TRUE));
-
-header("Location: " . $_SERVER['HTTP_REFERER'] . "?group_added=true&group_name=$group_name");
+unset($_SESSION['new_group']);
+$_SESSION['new_group'] = $_POST;
+//die(var_dump($_SESSION['new_group']));
+if(!empty($result)){
+    $_SESSION['new_group']['error'] = $result;
+    header("Location: " . $_SERVER['HTTP_REFERER']);
+}else{
+    header("Location: " . $_SERVER['HTTP_REFERER']);
+}

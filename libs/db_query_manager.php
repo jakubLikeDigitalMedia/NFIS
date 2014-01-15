@@ -81,7 +81,8 @@ class DbQueryManager {
             $query = 'SET FOREIGN_KEY_CHECKS = 0; '.$query;
             if ($this->multiQuery($query))  return $this->conn->insert_id; // last inserted id
         }
-
+        
+        //die(var_dump($query));
         //echo($query).'</br>';
         if ($this->conn->query($query)){
             return $this->conn->insert_id; // last inserted id

@@ -5,7 +5,9 @@
  * Date: 13/12/2013
  * Time: 13:30
  */
-include_once 'config.php';
+
+
+include_once str_replace(basename(__FILE__), 'config.php', __FILE__);
 include_once LIBS.'/session_manager.php';
 include_once LIBS.'/dbmanager.php';
 include_once LIBS.'/db_query_manager.php';
@@ -39,3 +41,15 @@ include_once MODELS . '/location.php';
 include_once MODELS . '/position.php';
 
 include_once MODELS . '/department.php';
+
+include_once MODELS_DEF . '/group.php';
+include_once MODELS . '/group.php';
+
+include_once MODELS_DEF . '/page.php';
+include_once MODELS . '/page.php';
+
+include_once MODELS_DEF . '/permissions.php';
+include_once MODELS . '/permissions.php';
+
+include_once MODELS_DEF . '/section.php';
+include_once MODELS . '/section.php';

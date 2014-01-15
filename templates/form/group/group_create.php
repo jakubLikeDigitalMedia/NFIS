@@ -6,6 +6,8 @@
  * Time: 11:53
  */
 
+include('../../core_incs.php');
+
 $group = new Group();
 $createGroupForm = $group->createFormArray();
-$permissions->createForm($createGroupForm);
+$group->createForm($createGroupForm);
