@@ -13,6 +13,8 @@ abstract class ModelAbstract {
     protected $DbTable;
 
     protected $dbQueryManager;
+    
+    protected $actionScript = SCRIPTS;
 
     protected $createScriptPath;
     protected $updateScriptPath;
@@ -64,7 +66,7 @@ abstract class ModelAbstract {
 
     public function createRecord($insertValues, $options = NULL){
         $dbQueryManager = new DbQueryManager();
-        return $dbQueryManager->insert($insertValues, $this->DbTable, $options);
+        return $dbQueryManager->insert($insertValues, "`$this->DbTable`", $options);
 
     }
 

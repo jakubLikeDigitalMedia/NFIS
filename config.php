@@ -20,15 +20,15 @@ if (APPLICATION_ENV === 'development'){
 define('APPLICATION_PATH', realpath(dirname(__FILE__)));
 define('LIBS', APPLICATION_PATH.'/libs');
 //define('SCRIPTS', APPLICATION_PATH.'/scripts');
-define('SCRIPTS', '../scripts');
+define('SCRIPTS', '../../scripts');
 define('MODELS', APPLICATION_PATH.'/models');
 define('MODELS_DEF', MODELS.'/def');
 
 define('DOMAIN', $_SERVER['SERVER_NAME']);
 
 define('IMAGES', APPLICATION_PATH.'/images');
-define('JS', '../js');
-define('CSS', '../css');
+define('JS', '../../js');
+define('CSS', '../../css');
 
 // teplates settings
 define('TEMPLATES', APPLICATION_PATH.'/templates');
@@ -85,8 +85,8 @@ if ($_SERVER['SERVER_NAME'] == 'nfis.com'){
 }
 else{
     define('DB_HOST', 'localhost');
-    define('DB_USER', 'nobel_NFIS');
-    define('DB_PASS', '1ntr4n3t');
+    define('DB_USER', 'root');
+    define('DB_PASS', '');
     define('DB_DBASE', 'nobel_NFIS_DB');
 
 }
