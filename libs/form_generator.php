@@ -136,7 +136,7 @@ class FormGenerator{
 
     public function setOptionToElements($elements, $option, $value){
         foreach($elements as $element){
-            $element['options'] = array($option => $value);
+            $element['options'][$option] = $value;
         }
         return $elements;
     }

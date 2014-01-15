@@ -12,7 +12,9 @@ ini_set('display_errors', '1');
 include_once '../../core_incs.php';
 
 session_start();
+//echo 'Post Values </br>';
 //var_dump($_POST);
+//echo 'end post values';
 //die();
 $employee = new Employee();
 $result = $employee->createAccount($_POST);

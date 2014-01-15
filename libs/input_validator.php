@@ -92,7 +92,7 @@ class InputValidator extends GUMP{
 
     public function validate_DOB($field, $input, $param = NULL){
 
-        if(!isset($input[$field])|| empty($input[$field]))
+        if(!isset($input[$field]) || empty($input[$field]))
         {
             return;
         }
@@ -168,6 +168,7 @@ class InputValidator extends GUMP{
 
     private function getErrors($employeeDetails, $validationRules){
         $validationResult = $this->validate($employeeDetails, $validationRules);
+        //die(var_dump($validationResult));
         if (!is_array($validationResult)) return NULL;
         else{
             $errorMessages = array();

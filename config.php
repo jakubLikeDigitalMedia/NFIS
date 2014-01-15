@@ -70,6 +70,7 @@ $incs = array(
 );
 
 set_include_path(implode(PATH_SEPARATOR, $incs));
+die(set_include_path(implode(PATH_SEPARATOR, $incs)));
 
 //die(get_include_path());
 

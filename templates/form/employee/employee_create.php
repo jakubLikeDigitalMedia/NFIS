@@ -15,7 +15,7 @@ $departmentList = $department->getPropertyList('title');
 $inputErrors = (isset($_SESSION['user']['errors']['current_empl']))? $_SESSION['user']['errors']['current_empl']: array();
 $userInputs = (isset($_SESSION['user']['inputs']['current_empl']))? $_SESSION['user']['inputs']['current_empl']: array();
 
-$formHelper = new FormHelper($inputErrors, $userInputs);
+$formHelper = new FormHelper( array('inputs' => $userInputs, 'errors' => $inputErrors) );
 
 $name = E_TABLE.SEP.E_NAME;
 $name = array(
@@ -167,6 +167,17 @@ $createAccountFormItems = array(
     )
 );
 
+// change names of fields for previous employment section
+$position['name'] = PREV_PREFIX.EMPL_TABLE.SEP.EMPL_POSITION;
+$brand['name'] = PREV_PREFIX.EMPL_TABLE.SEP.EMPL_BRAND;
+$department['name'] = PREV_PREFIX.EMPL_TABLE.SEP.EMPL_DEPARTMENT;
+$location['name'] = PREV_PREFIX.EMPL_TABLE.SEP.EMPL_LOCATION;
+
+$street['name'] = PREV_PREFIX.OA_TABLE.SEP.OA_STREET;
+$postcode['name'] = PREV_PREFIX.OA_TABLE.SEP.OA_POSTCODE;
+$city['name'] = PREV_PREFIX.OA_TABLE.SEP.OA_CITY;
+$county['name'] = PREV_PREFIX.OA_TABLE.SEP.OA_COUNTY;
+
 $prevEmplSelect = array(
     $position,
     $brand,
@@ -181,6 +192,13 @@ $prevEmplAddress = array(
     $county
 );
 
+$formGen = new FormGenerator('create_account', $employee->getProperty('createScriptPath'), 'post');
+
+// add multiple option to fields
+$formGen->setOptionToElements($prevEmplSelect, 'multiple', TRUE);
+$formGen->setOptionToElements($prevEmplAddress, 'multiple', TRUE);
+
+die(var_dump($prevEmplAddress));
 
 $HTMLBlock = <<< HTML
 <div id="previous-employment">
@@ -192,6 +210,15 @@ if(isset($_SESSION['user']['inputs']['prev_empl'])){
     for($i=0; $i < count($_SESSION['user']['inputs']['prev_empl']); $i++){
         $inputErrors = (isset($_SESSION['user']['errors']['prev_empl'][$i]))? $_SESSION['user']['errors']['prev_empl'][$i]: array();
         $userInputs = (isset($_SESSION['user']['inputs']['prev_empl'][$i]))? $_SESSION['user']['inputs']['prev_empl'][$i]: array();
+
+        $formHelper = new FormHelper($userInputs, $inputErrors);
+
+        $prevEmplSelect = $formHelper->setValuesForElements($prevEmplSelect);
+        $prevEmplSelect = $formHelper->setValuesForElements($prevEmplSelect);
+
+        $prevEmplAddress = $formHelper->setValuesForElements($prevEmplAddress);
+        $prevEmplAddress = $formHelper->setValuesForElements($prevEmplAddress);
+
         $prevEmplSelect = $formGen->createElements($prevEmplSelect);
         $HTMLBlock .= $formGen->renderElements($prevEmplSelect, 'list');
         $prevEmplAddress = $formGen->createElements($prevEmplAddress, 'Office Address');
@@ -205,7 +232,7 @@ $HTMLBlock .= <<< HTML
 HTML;
 
 
-$formGen = new FormGenerator('create_account', $employee->getProperty('createScriptPath'), 'post');
+
 $formGen->addElements($createAccountFormItems);
 $formGen->addHTMLBlock($HTMLBlock);
 echo $formGen->render('list');
@@ -215,7 +242,6 @@ echo $formGen->render('list');
 <div class="new-block hide original" >
     <?php
         if (!isset($hide)){
-            $hide = TRUE;
             $prevEmplSelect = $formGen->createElements($prevEmplSelect);
             echo $formGen->renderElements($prevEmplSelect, 'div');
             $prevEmplAddress = $formGen->createElements($prevEmplAddress, 'Office Address');
