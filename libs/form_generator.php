@@ -80,7 +80,8 @@ class FormGenerator{
         $error = $this->getOption($element, 'error');
         $class = $this->getOption($element, 'class');
         $wrapper = $this->getOption($element, 'wrapper');
-        $size = (empty($this->getOption($element, 'size')))? $this->textFieldSize: $this->getOption($element, 'size');
+        $size = $this->getOption($element, 'size');
+        $size = (empty($size))? $this->textFieldSize: $size;
         $id = "{$this->name}_{$element['name']}";
         $HTML = "<label for=\"$id\" class=\"{$this->labelClass}\">{$element['label']}</label>";
         $HTML .= (!empty($error))? "<div class=\"error\">$error</div>": '';
