@@ -81,6 +81,7 @@ class FormGenerator{
         $class = $this->getOption($element, 'class');
         $wrapper = $this->getOption($element, 'wrapper');
         $size = $this->getOption($element, 'size');
+        $disable = $this->getOption($element, 'disable');
         $options = $this->getOption($element, 'options');
         $size = (empty($size))? $this->textFieldSize: $size;
         $id = "{$this->name}_{$element['name']}";
@@ -107,7 +108,7 @@ class FormGenerator{
                 else return $HTML.'</select>';
                 break;
             case 'checkbox':
-                 $disabled = ($element['options'][$option] == true)?"disabled=\"disabled\"":"";
+                 $disabled = ($disable == true)?"disabled=\"disabled\"":"";
                  $el = "<input type=\"checkbox\" id=\"$id\" class=\"$class\" name=\"{$element['name']}\" value=\"{$element['value']}\" $disabled>";
                  $HTML .= (!empty($wrapper))? "<$wrapper>$el</$wrapper>": $el;
                  return $HTML;
