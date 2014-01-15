@@ -13,10 +13,13 @@ session_start();
 //creating a new group
 $group = new Group();
 $result = $group->createGroup($_POST);
-$groupName = $_POST['new_group'];
-if(!$result){
-    $_SESSION['user']['inputs']['current_grp'] = $_POST;
-    header("Location: " . $_SERVER['HTTP_REFERER'] . "?group_added=true&group_name=$groupName");
+
+unset($_SESSION['new_group']);
+$_SESSION['new_group'] = $_POST;
+//die(var_dump($_SESSION['new_group']));
+if(!empty($result)){
+    $_SESSION['new_group']['error'] = $result;
+    header("Location: " . $_SERVER['HTTP_REFERER']);
 }else{
-    header("Location: " . $_SERVER['HTTP_REFERER'] . "?group_added=false&group_name=$groupName");
+    header("Location: " . $_SERVER['HTTP_REFERER']);
 }

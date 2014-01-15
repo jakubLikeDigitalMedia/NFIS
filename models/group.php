@@ -75,15 +75,16 @@ class Group extends ModelAbstract{
     public function createForm($form_array){ //prints out the $form_array into a table
         $formGen = new FormGenerator('group_permissions', $this->getProperty("createScriptPath"), 'post');
         $tmp_section_title = "";
-        if(isset($_GET['group_added']) && $_GET['group_added'] == true){
-            echo "<div>---GROUP '". $_GET['group_name'] . "' HAS BEEN ADDED---</div>";
-        }elseif(isset($_GET['group_added']) && $_GET['group_added'] == false){
-            echo "<div>---ERROR: GROUP '". $_GET['group_name'] . "' HAS NOT BEEN ADDED---</div>";
+        if(isset($_SESSION['new_group']['error']) && !empty($_SESSION['new_group']['error'])){
+            echo "<div>".$_SESSION['new_group']['error']."</div>";
+        }else{
+            echo "<div>---GROUP ". $_SESSION['new_group']['new_group'] ." HAS BEEN ADDED---</div>";
         }
         echo "<form method='post' action='". $this->getProperty("createScriptPath") ."'>";
         //echo "<label style='width: 70px;display: inline-block;'>Group name</label><input type='text' name='new_group' />";
        echo $formGen->createElement('text', 'Group name', 'new_group', '');
-       echo "<input type='submit' name='submit' />";
+        $formGen->setSubmitButton('name', 'submit', '');
+        echo $formGen->createSubmitButton();
         foreach($form_array as $section => $value){
             foreach ($value as $section => $val) {
                 $title = $val['title'];
@@ -109,14 +110,14 @@ class Group extends ModelAbstract{
                 $add_vote = $page['add_vote'];
 
                 echo "<li><ul style='display: inline;'>";
-                echo "<li style='display: inline-block; margin-left: 20px;'>" . $formGen->createElement('checkbox', $title, 'display-' . $id, '1', array('class' => 'section_page')) . "</li>";
-                echo "<li style='display: inline-block; margin-left: 20px;'>" . $formGen->createElement('checkbox', 'Add post', 'add_post-' . $id, '1', array('class' => 'section_page')) . "</li>";
-                echo "<li style='display: inline-block; margin-left: 20px;'>" . $formGen->createElement('checkbox', 'Add comment', 'add_comment-' . $id, '1', array('class' => 'section_page')) . "</li>";
-                echo "<li style='display: inline-block; margin-left: 20px;'>" . $formGen->createElement('checkbox', 'Add vote', 'add_vote-' . $id, '1', array('class' => 'section_page')) . "</li>";
-                //echo "<li style='display: inline-block; margin-left: 20px;'><label for='display-$id' style='width: 200px;display: inline-block;'>$title</label><input class='section_page' type='checkbox' name='display-$id' value='1' /><input type='hidden' name='page_id[]' value='$id'</li>";
-                //echo "<li style='display: inline-block; margin-left: 20px;'><label for='add_post-$id' style='width: 70px;display: inline-block;'>Add post</label><input type='checkbox' name='add_post-$id' checked='checked' value='1' /></li>";
-                //echo "<li style='display: inline-block; margin-left: 20px;'><label for='add_comment-$id' style='width: 100px;display: inline-block;'>Add comment</label><input type='checkbox' name='add_comment-$id' checked='checked' value='1' /></li>";
-                //echo "<li style='display: inline-block; margin-left: 20px;'><label for='add_vote-$id' style='width: 70px;display: inline-block;'>Add vote</label><input type='checkbox' name='add_vote-$id' value='1' /></li>";
+                    echo "<li style='display: inline-block; margin-left: 20px;'>" . $formGen->createElement('checkbox', $title . " Display ", 'display-' . $id, '1', array('class' => 'section_page')) . "<input type='hidden' name='page_id[]' value='$id' /></li>";
+                    echo "<li style='display: inline-block; margin-left: 20px;'>" . $formGen->createElement('checkbox', 'Add post', 'add_post-' . $id, '1', array('class' => 'section_page')) . "</li>";
+                    echo "<li style='display: inline-block; margin-left: 20px;'>" . $formGen->createElement('checkbox', 'Add comment', 'add_comment-' . $id, '1', array('class' => 'section_page')) . "</li>";
+                    echo "<li style='display: inline-block; margin-left: 20px;'>" . $formGen->createElement('checkbox', 'Add vote', 'add_vote-' . $id, '1', array('class' => 'section_page')) . "</li>";
+                    //echo "<li style='display: inline-block; margin-left: 20px;'><label for='display-$id' style='width: 200px;display: inline-block;'>$title</label><input class='section_page' type='checkbox' name='display-$id' value='1' /><input type='hidden' name='page_id[]' value='$id'</li>";
+                    //echo "<li style='display: inline-block; margin-left: 20px;'><label for='add_post-$id' style='width: 70px;display: inline-block;'>Add post</label><input type='checkbox' name='add_post-$id' checked='checked' value='1' /></li>";
+                    //echo "<li style='display: inline-block; margin-left: 20px;'><label for='add_comment-$id' style='width: 100px;display: inline-block;'>Add comment</label><input type='checkbox' name='add_comment-$id' checked='checked' value='1' /></li>";
+                    //echo "<li style='display: inline-block; margin-left: 20px;'><label for='add_vote-$id' style='width: 70px;display: inline-block;'>Add vote</label><input type='checkbox' name='add_vote-$id' value='1' /></li>";
                 echo "</ul></li>";
 
                 echo $ul_end;
@@ -127,14 +128,28 @@ class Group extends ModelAbstract{
     
     public function createGroup($_post){
         $groupName = $_post['new_group'];
-        $groupID = $this->createRecord(array(G_TITLE => $groupName));
-        //adding permissions for the group
-        $groupArray = $this->createGroupArray($groupID, $_post);// creating a multiple insert
         
-        $permissions = new Permissions();
-        $permissions->createRecord($groupArray, array('multiple_insert' => TRUE));
+        if(isset($groupName) && !empty($groupName)){
+            $dbc = new DbQueryManager();
+            $validationResult = "";
+            $sameTitle = $dbc->selectQuery("SELECT title, grp_id FROM `group` WHERE title='$groupName'", 'grp_id');
+           
+            if(sizeOf($sameTitle) > 0){
+                $validationResult = "Group name already exists";
+            }else{
+                $groupID = $this->createRecord(array(G_TITLE => $groupName));
+                //adding permissions for the group
+                $groupArray = $this->createGroupArray($groupID, $_post);// creating a multiple insert
+
+                $permissions = new Permissions();
+                $permissions->createRecord($groupArray, array('multiple_insert' => TRUE));
+            }
+        }else{
+            $validationResult = "Group name is required";
+        }
         
-        return true;
+        
+        return $validationResult;
     }
 
 
