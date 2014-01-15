@@ -80,20 +80,27 @@ class FormGenerator{
         $error = $this->getOption($element, 'error');
         $class = $this->getOption($element, 'class');
         $wrapper = $this->getOption($element, 'wrapper');
+
+        $multiple = $this->getOption($element, 'multiple');
+        $multiple = (!empty($multiple))? '[]': '';
+
+        $disabled = $this->getOption($element, 'disabled');
+        $disabled = (!empty($disabled))? "disabled=\"disabled\"": '';
+
         $size = $this->getOption($element, 'size');
-        $options = $this->getOption($element, 'options');
         $size = (empty($size))? $this->textFieldSize: $size;
+
         $id = "{$this->name}_{$element['name']}";
         $HTML = "<label for=\"$id\" class=\"{$this->labelClass}\">{$element['label']}</label>";
         $HTML .= (!empty($error))? "<div class=\"error\">$error</div>": '';
         switch($element['type']){
             case 'text':
-                $el = "<input type=\"text\" id=\"$id\" class=\"$class\" name=\"{$element['name']}\" value=\"{$element['value']}\" size=\"$size\">";
+                $el = "<input type=\"text\" id=\"$id\" class=\"$class\" name=\"{$element['name']}$multiple\" value=\"{$element['value']}\" size=\"$size\" $disabled>";
                 $HTML .= (!empty($wrapper))? "<$wrapper>$el</$wrapper>": $el;
                 return $HTML;
                 break;
             case 'select':
-                $HTML .= "<select id=\"$id\" class=\"$class\" name=\"{$element['name']}\">";
+                $HTML .= "<select id=\"$id\" class=\"$class\" name=\"{$element['name']}$multiple\">";
                 $options = $element['value']['values'];
                 if (is_array($options)){
                     $initVal = (empty($options))? 'No options are available': 'Select value';
@@ -107,8 +114,9 @@ class FormGenerator{
                 else return $HTML.'</select>';
                 break;
             case 'checkbox':
-                 $disabled = ($element['options'][$option] == true)?"disabled=\"disabled\"":"";
-                 $el = "<input type=\"checkbox\" id=\"$id\" class=\"$class\" name=\"{$element['name']}\" value=\"{$element['value']}\" $disabled>";
+                 $checked = $this->getOption($element, 'checked');
+                 $checked = (!empty($disabled))? "checked=\"checked\"": '';
+                 $el = "<input type=\"checkbox\" id=\"$id\" class=\"$class\" name=\"{$element['name']}{$multiple}\" value=\"{$element['value']}\" $checked $disabled>";
                  $HTML .= (!empty($wrapper))? "<$wrapper>$el</$wrapper>": $el;
                  return $HTML;
                  break;
@@ -124,6 +132,13 @@ class FormGenerator{
             default:
                 return (isset($element['options'][$option]))? $element['options'][$option]:'';
         }
+    }
+
+    public function setOptionToElements($elements, $option, $value){
+        foreach($elements as $element){
+            $element['options'] = array($option => $value);
+        }
+        return $elements;
     }
     
     /*
@@ -206,15 +221,14 @@ class FormGenerator{
 
     }
 
-    private function createSubmitButton(){
-        $class = (isset($options['class']))? "class=\"{$this->ButtonClass} {$options['class']}\"": $this->ButtonClass;
-        $options = $this->ButtonOptions;
-        $HTML = "<button id=\"{$this->ButtonName}\" type=\"submit\" $class >{$this->ButtonValue}</button>";
-        return (isset($options['wrapper']))? "<{$options['wrapper']}>$$HTML</{$options['wrapper']}>": $HTML;
-
+    public function renderElements($elements, $type){
+        $HTML = '';
+        foreach ($elements as $group => $elements) {
+            $elements = (is_string($elements))? array($elements): $elements;
+            $HTML .= $this->renderGroup($group, $elements, $type);
+        }
+        return $HTML;
     }
-
-    
 
     private function renderGroup($label, $elements, $type){
         $HTML = (empty($label) OR is_numeric($label))? '': "<fieldset><legend>$label</legend>";
@@ -248,23 +262,12 @@ class FormGenerator{
         return $HTML;
 
     }
-    
-    
 
-    public function renderElements($elements, $type){
-        $HTML = '';
-        foreach ($elements as $group => $elements) {
-            $elements = (is_string($elements))? array($elements): $elements;
-            $HTML .= $this->renderGroup($group, $elements, $type);
-        }
-        return $HTML;
+    public function createSubmitButton(){
+        $class = (isset($options['class']))? "class=\"{$this->ButtonClass} {$options['class']}\"": $this->ButtonClass;
+        $options = $this->ButtonOptions;
+        $HTML = "<button id=\"{$this->ButtonName}\" type=\"submit\" $class >{$this->ButtonValue}</button>";
+        return (isset($options['wrapper']))? "<{$options['wrapper']}>$HTML</{$options['wrapper']}>": $HTML;
+
     }
-
-
-
-
-
-
-
-
 }
