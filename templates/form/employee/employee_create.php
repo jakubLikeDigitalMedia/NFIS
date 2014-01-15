@@ -145,7 +145,6 @@ $county = array(
 );
 
 $createAccountFormItems = array(
-    $name,
     'Personal Information' => array(
         $name,
         $surname,
@@ -206,7 +205,7 @@ $HTMLBlock .= <<< HTML
 HTML;
 
 
-$formGen = new FormGenerator('create_account', $employee->getProperty('createScript'), 'post');
+$formGen = new FormGenerator('create_account', $employee->getProperty('createScriptPath'), 'post');
 $formGen->addElements($createAccountFormItems);
 $formGen->addHTMLBlock($HTMLBlock);
 echo $formGen->render('list');

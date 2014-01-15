@@ -47,6 +47,18 @@ class DbQueryManager {
         }
 
     }
+
+    private function escapeValues($valuesArray){
+        $columns = array();
+        $values = array();
+        foreach($valuesArray as $column => $value){
+            $columns[] = $column;
+            $values[] = $this->conn->real_escape_string($value);
+        }
+        return array($columns, $values);
+    }
+
+
     /*
      * function iserts data into database
      *
@@ -54,20 +66,23 @@ class DbQueryManager {
      */
     public function insert($insertValues, $table, $options = NULL){
         //die(var_dump($options));
-        $columns = array();
-        $values = array();
-        foreach($insertValues as $column => $value){
-            $columns[] = $column;
-            $values[] = $this->conn->real_escape_string($value);
+        $query = '';
+
+        if (empty($options)){
+            list($columns, $values) = $this->escapeValues($insertValues);
+            $query = "INSERT INTO $table (".implode(',', $columns).") VALUES ('".implode("','", $values)."')";
         }
-        $query = "INSERT INTO $table (".implode(',', $columns).") VALUES ('".implode("','", $values)."')";
-        //echo($query).'</br>';
+
+        if (isset($options['multiple_insert']) && $options['multiple_insert'] === TRUE){
+            $query = $this->createMultipleInsertQuery($insertValues, $table);
+        }
+
         if (isset($options['check_parent']) && $options['check_parent'] === FALSE){
             $query = 'SET FOREIGN_KEY_CHECKS = 0; '.$query;
             if ($this->multiQuery($query))  return $this->conn->insert_id; // last inserted id
         }
 
-
+        //echo($query).'</br>';
         if ($this->conn->query($query)){
             return $this->conn->insert_id; // last inserted id
         }
@@ -90,6 +105,19 @@ class DbQueryManager {
             }
             else return TRUE;
         }
+    }
+
+
+    public function createMultipleInsertQuery($groupArray, $table){
+        $tmpValues = array();
+        $columns = '';
+        foreach($groupArray as $page){
+            list($columns, $values) = $this->escapeValues($page);
+            $tmpValues[] = '('.implode(',', array_values($values)).')';
+            $columns = (empty($columns))? implode(',', $columns): $columns;
+        }
+        $query = "INSERT INTO $table (" . implode(',',$columns) . ") VALUES ";
+        return $query . implode(', ', $tmpValues);
     }
 
 
