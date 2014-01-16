@@ -36,10 +36,13 @@ include_once MODELS . '/employment.php';
 include_once MODELS_DEF . '/brand.php';
 include_once MODELS . '/brand.php';
 
+include_once MODELS_DEF . '/location.php';
 include_once MODELS . '/location.php';
 
+include_once MODELS_DEF . '/position.php';
 include_once MODELS . '/position.php';
 
+include_once MODELS_DEF . '/department.php';
 include_once MODELS . '/department.php';
 
 include_once MODELS_DEF . '/group.php';
