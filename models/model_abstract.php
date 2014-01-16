@@ -56,9 +56,8 @@ abstract class ModelAbstract {
 
 
 
-    public function getPropertyList($propertyName, $orderType = NULL){
-        $query = "SELECT {$this->primaryKey}, $propertyName FROM {$this->DbTable} ORDER BY $propertyName";
-        if (isset($orderType)) $query .= " $orderType";
+    public function getPropertyList($propertyName, $orderType = 'DESC'){
+        $query = "SELECT {$this->primaryKey}, $propertyName FROM {$this->DbTable} ORDER BY $propertyName $orderType";
         return $this->dbQueryManager->selectQuery($query, $this->primaryKey, 'list');
 
     }
