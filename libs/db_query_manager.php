@@ -91,9 +91,36 @@ class DbQueryManager {
             $this->rollBack();
             throw new DatabaseErrorException($this->conn->error, $query);
         }
-
     }
+    
+   public function update($updateValues, $conditions, $table, $options = NULL){
+        $query = '';
 
+        if (empty($options)){
+             list($columns, $values) = $this->escapeValues($updateValues);
+             $newValues = array();
+             for($i = 0; $i < count($columns)-1; $i++){
+                 $newValues[] = ' ' . $columns[$i] . '=' . $values[$i];
+             }
+             
+            $query = "UPDATE $table SET (".implode(',', $newValues).") WHERE (".implode(',', $conditions).")";
+        }
+
+        if (isset($options['multiple_update_one']) && $options['multiple_update_one'] === TRUE){
+            list($columns, $values) = $this->escapeValues($updateValues);
+            $column = explode('-',$columns[0])[0];
+            
+            $query = "UPDATE $table SET id_grp='$column' WHERE empl_id IN (" . implode(',', $values) . ")";
+        }
+        
+        if ($this->conn->query($query)){
+          //  return $this->conn->insert_id; // last inserted id
+        }
+        else{
+            $this->rollBack();
+            throw new DatabaseErrorException($this->conn->error, $query);
+        }
+    }
 
     private function multiQuery($multiQuery){
         if ($this->conn->multi_query($multiQuery)){
