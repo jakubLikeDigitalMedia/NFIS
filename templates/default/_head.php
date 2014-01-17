@@ -10,7 +10,7 @@ session_start();
 
 
 // check stolen session
-$session = SessionManager::getInstance('user');
+//$session = SessionManager::getInstance('user');
 
 if (!isset($_SESSION['user']['userADId'])){
 //    //get info from http header

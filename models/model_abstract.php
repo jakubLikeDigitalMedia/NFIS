@@ -102,8 +102,8 @@ abstract class ModelAbstract {
         }
     }
 
-    public function recordExist($property){
-        $query =  "SELECT `{$this->primaryKey}`, $property FROM `{$this->DbTable}`";
+    public function recordExist($property, $value){
+        $query =  "SELECT `{$this->primaryKey}`, $property FROM `{$this->DbTable}` WHERE `$property` = '$value'";
         $result = $this->dbQueryManager->selectQuery($query, $this->primaryKey, 'list');
         return (boolean)sizeof($result) > 0;
     }

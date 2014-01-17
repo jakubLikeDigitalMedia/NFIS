@@ -17,14 +17,12 @@ class Group extends ModelAbstract{
     public function createGroup($_post){
         $groupName = $_post[self::TITLE];
         // validation;
-        if ($this->recordExist(self::TITLE)) return 'Group with name '.$_post[self::TITLE].' already exists';
+        if ($this->recordExist(self::TITLE, $groupName)) return 'Group with name '.$_post[self::TITLE].' already exists';
         else{
-            $groupID = $this->createRecord(array(G_TITLE => $groupName));
+            $groupID = $this->createRecord(array(self::TITLE => $groupName));
             //adding permissions for the group
             $permissions = new Permissions();
             $insertArrays = $permissions->createInsertArrays($_post, $groupID);// creating a multiple insert
-            var_dump($insertArrays);
-            die;
             $permissions->createRecord($insertArrays, array('multiple_insert' => TRUE));
         }
     }
