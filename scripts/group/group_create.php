@@ -14,8 +14,10 @@ session_start();
 $group = new Group();
 $result = $group->createGroup($_POST);
 
+die;
+
 unset($_SESSION['new_group']);
-$_SESSION['new_group'] = $_POST;
+$_SESSION['group']['inputs'] = $_POST;
 //die(var_dump($_SESSION['new_group']));
 if(!empty($result)){
     $_SESSION['new_group']['error'] = $result;

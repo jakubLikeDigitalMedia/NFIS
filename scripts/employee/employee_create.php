@@ -25,9 +25,9 @@ if (!empty($result['current_empl']) OR (!empty($result['prev_empl']))){
     $_SESSION['user']['errors']['prev_empl'] = $result['prev_empl'];
     $_SESSION['user']['inputs']['prev_empl'] = $result['prev_empl_vals'];
     //die(var_dump($_SESSION['user']));
-    header('location: ../../intranet/employee_create.php');
+    header('location: '.$_SERVER['HTTP_REFERER']);
 }
 elseif(is_bool($result) && $result === TRUE){
-    header('location: ../../intranet/acount_created.php');
+    header('location: ../intranet/acount_created.php');
 
 }

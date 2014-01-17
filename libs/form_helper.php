@@ -17,6 +17,8 @@ class FormHelper {
 
     }
 
+
+
     public function getFieldValue($fieldName,  $default = ''){
         return (isset($this->inputs[$fieldName]))? $this->inputs[$fieldName]: $default;
     }
@@ -25,26 +27,36 @@ class FormHelper {
         return (isset($this->errors[$fieldName]))? $this->errors[$fieldName]: '';
     }
 
-    public function setValueForElement($element, $defalut = ''){
-        return $element['value'] = $this->getFieldValue($element['name'], $defalut);
+    public function setValueForTextElement(&$element, $defalut = ''){
+        $element['value'] = $this->getFieldValue($element['name'], $defalut);
     }
 
-    public function setValuesForElements($elements){
-        foreach ($elements as $element) {
-            $element['value'] = $this->getFieldValue($element['name']);
+    public function setValuesForTextElements(&$elements){
+        foreach ($elements as $key => $element) {
+            $this->setValueForTextElement($elements[$key]);
         }
-        return $element;
     }
 
-    public function setErrorForElement($element, $defalut = ''){
-        return $element['options']['error'] = $this->getFieldError($element['name']);
+    public function setValueForSelectElement(&$element){
+        //var_dump($element);
+        $element['value']['selected'] = $this->getFieldValue($element['name']);
+
     }
 
-    public function setErrorsForElements($elements){
-        foreach ($elements as $element) {
-            $element['value'] = $this->getFieldValue($element['name']);
+    public function setValuesForSelectElements(&$elements){
+        foreach ($elements as $key => $element) {
+            $this->setValueForSelectElement($elements[$key]);
         }
-        return $element;
+    }
+
+    public function setErrorForElement(&$element){
+        $element['options']['error'] = $this->getFieldError($element['name']);
+    }
+
+    public function setErrorsForElements(&$elements){
+        foreach ($elements as $key => $element) {
+            $this->setErrorForElement($elements[$key]);
+        }
     }
 
 } 

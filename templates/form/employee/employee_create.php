@@ -7,10 +7,10 @@ $department = new Department();
 $employee = new Employee();
 
 $superiorList = $employee->getSuperiors();
-$brandList = $brand->getPropertyList('title', 'title');
-$positionList = $position->getPropertyList('title');
-$locationList = $location->getPropertyList('title');
-$departmentList = $department->getPropertyList('title');
+$brandList = $brand->getPropertyList(B_TITLE);
+$positionList = $position->getPropertyList(P_TITLE);
+$locationList = $location->getPropertyList(L_TITLE);
+$departmentList = $department->getPropertyList(DE_TITLE);
 
 $inputErrors = (isset($_SESSION['user']['errors']['current_empl']))? $_SESSION['user']['errors']['current_empl']: array();
 $userInputs = (isset($_SESSION['user']['inputs']['current_empl']))? $_SESSION['user']['inputs']['current_empl']: array();
@@ -198,7 +198,9 @@ $formGen = new FormGenerator('create_account', $employee->getProperty('createScr
 $formGen->setOptionToElements($prevEmplSelect, 'multiple', TRUE);
 $formGen->setOptionToElements($prevEmplAddress, 'multiple', TRUE);
 
-die(var_dump($prevEmplAddress));
+//die(var_dump($prevEmplAddress));
+
+
 
 $HTMLBlock = <<< HTML
 <div id="previous-employment">
@@ -207,22 +209,20 @@ $HTMLBlock = <<< HTML
 <div class="add-block" >
 HTML;
 if(isset($_SESSION['user']['inputs']['prev_empl'])){
+
     for($i=0; $i < count($_SESSION['user']['inputs']['prev_empl']); $i++){
         $inputErrors = (isset($_SESSION['user']['errors']['prev_empl'][$i]))? $_SESSION['user']['errors']['prev_empl'][$i]: array();
         $userInputs = (isset($_SESSION['user']['inputs']['prev_empl'][$i]))? $_SESSION['user']['inputs']['prev_empl'][$i]: array();
 
-        $formHelper = new FormHelper($userInputs, $inputErrors);
+        $formHelper = new FormHelper(array('inputs' => $userInputs, 'errors' => $inputErrors));
 
-        $prevEmplSelect = $formHelper->setValuesForElements($prevEmplSelect);
-        $prevEmplSelect = $formHelper->setValuesForElements($prevEmplSelect);
+        //var_dump($prevEmplSelect);
 
-        $prevEmplAddress = $formHelper->setValuesForElements($prevEmplAddress);
-        $prevEmplAddress = $formHelper->setValuesForElements($prevEmplAddress);
+        $formHelper->setValuesForSelectElements($prevEmplSelect);
+        $formHelper->setValuesForTextElements($prevEmplAddress);
 
-        $prevEmplSelect = $formGen->createElements($prevEmplSelect);
-        $HTMLBlock .= $formGen->renderElements($prevEmplSelect, 'list');
-        $prevEmplAddress = $formGen->createElements($prevEmplAddress, 'Office Address');
-        $HTMLBlock .= $formGen->renderElements($prevEmplAddress, 'div');
+        $HTMLBlock .= $formGen->renderElements($formGen->createElements($prevEmplSelect), 'div');
+        $HTMLBlock .= $formGen->renderElements($formGen->createElements($prevEmplAddress, 'Office Address'), 'div');
     }
 }
 
@@ -231,24 +231,26 @@ $HTMLBlock .= <<< HTML
 </div>
 HTML;
 
-
-
 $formGen->addElements($createAccountFormItems);
 $formGen->addHTMLBlock($HTMLBlock);
 echo $formGen->render('list');
+
+
 
 ?>
 
 <div class="new-block hide original" >
     <?php
-        if (!isset($hide)){
-            $prevEmplSelect = $formGen->createElements($prevEmplSelect);
-            echo $formGen->renderElements($prevEmplSelect, 'div');
-            $prevEmplAddress = $formGen->createElements($prevEmplAddress, 'Office Address');
-            echo $formGen->renderElements($prevEmplAddress, 'div');
+        //render previous employment fields
 
-        }
+        $formGen->setOptionToElements($prevEmplSelect, 'error', '');
+        $formGen->setOptionToElements($prevEmplAddress, 'error', '');
+
+        echo $formGen->renderElements($formGen->createElements($prevEmplSelect), 'div');
+        echo $formGen->renderElements($formGen->createElements($prevEmplAddress, 'Office Address'), 'div');
+
     ?>
+
 </div>
 <?php
 //clear session

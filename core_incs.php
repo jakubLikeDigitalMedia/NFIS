@@ -48,11 +48,13 @@ include_once MODELS . '/department.php';
 include_once MODELS_DEF . '/group.php';
 include_once MODELS . '/group.php';
 
-include_once MODELS_DEF . '/page.php';
-include_once MODELS . '/page.php';
-
 include_once MODELS_DEF . '/permissions.php';
 include_once MODELS . '/permissions.php';
 
 include_once MODELS_DEF . '/section.php';
 include_once MODELS . '/section.php';
+
+include_once MODELS_DEF . '/page.php';
+include_once MODELS . '/page.php';
+
+
