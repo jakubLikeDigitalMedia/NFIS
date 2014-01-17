@@ -134,11 +134,14 @@ class FormGenerator{
         }
     }
 
-    public function setOptionToElements($elements, $option, $value){
-        foreach($elements as $element){
-            $element['options'][$option] = $value;
+    public function setElementOption(&$element, $option, $value){
+        $element['options'][$option] = $value;
+    }
+
+    public function setOptionToElements(&$elements, $option, $value){
+        foreach($elements as $key => $element){
+            $this->setElementOption($elements[$key], $option, $value);
         }
-        return $elements;
     }
     
     /*
