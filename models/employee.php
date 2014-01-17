@@ -106,10 +106,10 @@ class Employee extends ModelAbstract{
 
             $this->dbQueryManager->startTransaction();
 
-            $employmentValues[EMPL_EMPLOYEE] = $newEmployeeId = $this->createRecord($employeeValues, E_TABLE, array('check_parent' => FALSE));
-            $employmentValues[EMPL_OFFICE_ADDRESS] = $officeAddress->createRecord($officeAddressValues, $officeAddress->DbTable);
+            $employmentValues[EMPL_EMPLOYEE] = $newEmployeeId = $this->createRecord($employeeValues, array('check_parent' => FALSE));
+            $employmentValues[EMPL_OFFICE_ADDRESS] = $officeAddress->createRecord($officeAddressValues);
             $employmentValues[EMPL_CURRENT] = 1;
-            $employment->createRecord($employmentValues, $employment->DbTable);
+            $employment->createRecord($employmentValues);
 
             // insert previous employment records
             if (!empty($prevEmplVals)){
@@ -168,7 +168,7 @@ class Employee extends ModelAbstract{
                     $employeeValues[$column] = $value;
                     if ($column == E_PARENT AND $value == 0) continue;
                     if ($column == E_DOB) $employeeValues[$column] = $this->getSQLDOB($value);
-                    $employeeValues[E_ADID] = $_SESSION['user']['userADId'];
+                    $employeeValues[E_ADID] = 2222;//$_SESSION['user']['userADId'];
                     break;
                 case OA_TABLE: $officeAddressValues[$column] = $value;
                     break;
@@ -183,6 +183,33 @@ class Employee extends ModelAbstract{
     private function getSQLDOB($userDOB){
         $dob = explode(DOB_SEP, $userDOB);
         return date('Y-m-d', mktime(0,0,0,$dob[1],$dob[0],$dob[2]));
+    }
+
+    public function getEmployeesList($new_group = ''){
+        $query = "SELECT `". E_TABLE . "`.`". E_NAME ."` AS 'name',
+            `". E_TABLE ."`.`". E_PRM_KEY ."` AS 'empl_id',
+            `". E_TABLE ."`.`". E_SURNAME ."` AS 'surname',
+            `". E_TABLE ."`.`". E_GROUP ."` AS 'group_id',
+            `". G_TABLE ."`.`". G_TITLE ."` AS 'group',
+            `". B_TABLE ."`.`". B_TITLE ."` AS 'brand',
+            `". P_TABLE ."`.`". P_TITLE ."` AS 'position',
+            `". L_TABLE ."`.`". L_TITLE ."` AS 'location',
+            `". DE_TABLE ."`.`". DE_TITLE ."` AS 'department'
+            FROM ". EMPL_TABLE ." LEFT JOIN ". E_TABLE ." ON `". E_TABLE ."`.`". E_PRM_KEY ."` = `". EMPL_TABLE ."`.`". EMPL_EMPLOYEE . "`
+             LEFT JOIN ". B_TABLE ." ON `". B_TABLE ."`.`". B_PRM_KEY ."` = `". EMPL_TABLE ."`.`". EMPL_BRAND . "`
+             LEFT JOIN ". P_TABLE ." ON `". P_TABLE ."`.`". P_PRM_KEY ."` = `". EMPL_TABLE ."`.`". EMPL_POSITION . "`
+             LEFT JOIN ". L_TABLE ." ON `". L_TABLE ."`.`". L_PRM_KEY ."` = `". EMPL_TABLE ."`.`". EMPL_LOCATION . "`
+             LEFT JOIN ". DE_TABLE ." ON `". DE_TABLE ."`.`". DE_PRM_KEY ."` = `". EMPL_TABLE ."`.`". EMPL_DEPARTMENT . "`
+             LEFT JOIN `". G_TABLE ."` ON `". G_TABLE ."`.`". G_PRM_KEY ."` = `". E_TABLE ."`.`". E_GROUP . "`
+            " . ((!empty($new_group))?" WHERE `" . E_TABLE."`.`".E_GROUP ."`='$new_group'":" WHERE `" . G_TABLE."`.`".G_TITLE ."`='default'");
+
+        $dbc = new DbQueryManager();
+        $result = $dbc->selectQuery($query, E_PRM_KEY);
+        $resultCopy = $result;
+        foreach($result as $id => $value){
+            $resultCopy[$id]['add'] = "<input type='checkbox' name='group_employee[]' value='$id'>";
+        }
+        return json_encode(array_values($resultCopy));
     }
 
 
