@@ -68,10 +68,9 @@ class DbQueryManager {
         //die(var_dump($options));
         $query = '';
 
-        if (empty($options)){
-            list($columns, $values) = $this->escapeValues($insertValues);
-            $query = "INSERT INTO $table (".implode(',', $columns).") VALUES ('".implode("','", $values)."')";
-        }
+        list($columns, $values) = $this->escapeValues($insertValues);
+        $query = "INSERT INTO $table (".implode(',', $columns).") VALUES ('".implode("','", $values)."')";
+        
 
         if (isset($options['multiple_insert']) && $options['multiple_insert'] === TRUE){
             $query = $this->createMultipleInsertQuery($insertValues, $table);
